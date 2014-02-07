@@ -243,13 +243,19 @@ UIEdgeInsets scrollViewOriginalContentInsets;
 - (void)scrollViewDidScroll:(CGPoint)contentOffset {
     if(self.state != SVInfiniteScrollingStateLoading && self.enabled) {
         CGFloat scrollViewContentHeight = self.scrollView.contentSize.height;
+        
+        UIView *customView = [self.viewForState objectAtIndex:self.state];
+        BOOL hasCustomView = [customView isKindOfClass:[UIView class]];
+        float currentViewHeight = hasCustomView?customView.bounds.size.height:SVInfiniteScrollingViewHeight;
+        
+        float sensitivityHeight = self.sensitivity?(self.sensitivity+currentViewHeight):0;
         CGFloat scrollOffsetThreshold = 0;
         switch (self.direction) {
             case SVInfiniteScrollingDirectionBottom:
-                scrollOffsetThreshold = scrollViewContentHeight-self.scrollView.bounds.size.height;
+                scrollOffsetThreshold = scrollViewContentHeight-self.scrollView.bounds.size.height-sensitivityHeight;
                 break;
             case SVInfiniteScrollingDirectionTop:
-                scrollOffsetThreshold = SVInfiniteScrollingViewHeight;
+                scrollOffsetThreshold = SVInfiniteScrollingViewHeight-sensitivityHeight;
                 break;
         }
         
@@ -349,6 +355,7 @@ UIEdgeInsets scrollViewOriginalContentInsets;
                 break;
                 
             case SVInfiniteScrollingStateTriggered:
+                [self.activityIndicatorView startAnimating];
                 break;
                 
             case SVInfiniteScrollingStateLoading:
